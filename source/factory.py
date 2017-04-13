@@ -6,8 +6,6 @@ from source.tree import Tree
 from source.cycle import Cycle
 import source.helper as helper
 
-Embedding = namedtuple('Embedding', ['ids', 'labels'])
-
 def initial_nodes(graphs):
     return [Node(node_id, source_graph) for source_graph in graphs for node_id in source_graph]
 
@@ -90,37 +88,37 @@ def _append_to_path(prev_path, new_back_id):
                 frontier_edges, prev_path.source_graph, embedding_list, 
                 total_symmetry, front_symmetry, back_symmetry)
 
-#
-# def _prepend_node_to_path(prev_path, new_start_node_id):
 
-#     new_node_label = prev_path.source_graph.node[new_start_node_id]['label']
-#     new_edge_label = prev_path.source_graph.edge[new_start_node_id][prev_path.start_node_id]['label']
+def _prepend_node_to_path(prev_path, new_start_node_id):
 
-#     edge1 = tuple(prev_path.embedding_list[:2]) # (l(v1), l(e1))
-#     new_edge = (new_node_label, new_edge_label)
-#     embedding_list = new_edge + prev_path.embedding_list
+    new_node_label = prev_path.source_graph.node[new_start_node_id]['label']
+    new_edge_label = prev_path.source_graph.edge[new_start_node_id][prev_path.start_node_id]['label']
 
-#     # Needs to be changed if using the O(1) method for finding new path symmetries
-#     total_symmetry, front_symmetry, back_symmetry = Path.new_path_symmetries(embedding_list)
+    edge1 = tuple(prev_path.embedding_list[:2]) # (l(v1), l(e1))
+    new_edge = (new_node_label, new_edge_label)
+    embedding_list = new_edge + prev_path.embedding_list
 
-#     # Check if refinement is allowed
-#     # append is allowed if total_symmetry == 1
-#     # (l(v'), l(e')) > (l(v1), l(e1))
-#     # if (l(v'), l(e')) == (l(v1), l(e1)) and back_symmetry >= 0
+    # Needs to be changed if using the O(1) method for finding new path symmetries
+    total_symmetry, front_symmetry, back_symmetry = Path.new_path_symmetries(embedding_list)
 
-#     if total_symmetry != 1 or edge1 == new_edge and back_symmetry == -1:
-#         return None
+    # Check if refinement is allowed
+    # append is allowed if total_symmetry == 1
+    # (l(v'), l(e')) > (l(v1), l(e1))
+    # if (l(v'), l(e')) == (l(v1), l(e1)) and back_symmetry >= 0
 
-#     # Incorrect order if graph is directed
-#     current_graph = extend_nx_graph(prev_path.current_graph, prev_path.start_node_id, new_start_node_id, 
-#                                     new_node_label, new_edge_label)
-#     frontier_edges = frontier_set(prev_path.source_graph, current_graph, prev_path.frontier_edges, 
-#                                   node_added=new_start_node_id, 
-#                                   edge_to_remove=(prev_path.start_node_id, new_start_node_id))
+    if total_symmetry != 1 or edge1 == new_edge and back_symmetry == -1:
+        return None
+
+    # Incorrect order if graph is directed
+    current_graph = helper.extend_nx_graph(prev_path.current_graph, prev_path.start_node_id, new_start_node_id, 
+                                           new_node_label, new_edge_label)
+    frontier_edges = helper.frontier_set(prev_path.source_graph, current_graph, prev_path.frontier_edges, 
+                                         node_added=new_start_node_id, 
+                                         edge_to_remove=(prev_path.start_node_id, new_start_node_id))
     
-#     return Path(new_start_node_id, prev_path.back_node_id, current_graph, 
-#                 frontier_edges, prev_path.source_graph, embedding_list, 
-#                 total_symmetry, front_symmetry, back_symmetry)
+    return Path(new_start_node_id, prev_path.back_node_id, current_graph, 
+                frontier_edges, prev_path.source_graph, embedding_list, 
+                total_symmetry, front_symmetry, back_symmetry)
 
 def _create_tree_from_path(prev_path, origin_id, target_id):
     root_node_id = prev_path.start_node_id
