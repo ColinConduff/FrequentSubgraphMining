@@ -1,14 +1,22 @@
 class Path(object):
     def __init__(self, start_node_id, back_node_id, current_graph, 
-                     frontier_edges, source_graph, embedding_list, 
+                     source_graph, embedding_list, 
                      total_symmetry, front_symmetry, back_symmetry):
         self.start_node_id, self.back_node_id, self.current_graph = start_node_id, back_node_id, current_graph
-        self.frontier_edges, self.source_graph, self.embedding_list = frontier_edges, source_graph, embedding_list
+        self.source_graph, self.embedding_list = source_graph, embedding_list
         self.total_symmetry, self.front_symmetry, self.back_symmetry = total_symmetry, front_symmetry, back_symmetry
 
     @property
-    def symmetry(self):
-        return iter((self.total_symmetry, self.front_symmetry, self.back_symmetry))
+    def frontier_edges(self):
+        for node_id in self.current_graph:
+            edges = self.current_graph.edge[node_id]
+            for neighbor_id in self.source_graph.neighbors_iter(node_id):
+                if neighbor_id not in edges:
+                    yield (node_id, neighbor_id)
+    
+    @property
+    def symmetries(self):
+        return (self.total_symmetry, self.front_symmetry, self.back_symmetry)
 
     @staticmethod
     def compute_symmetry(embedding_list, reversed_list=None):

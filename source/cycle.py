@@ -1,6 +1,14 @@
 class Cycle(object):
     def __init__(self, source_node_id, current_graph, 
-                     frontier_edges, source_graph, embedding_list):
+                 source_graph, embedding_list):
         self.source_node_id, self.current_graph = source_node_id, current_graph
-        self.frontier_edges, self.source_graph = frontier_edges, source_graph
+        self.source_graph = source_graph
         self.embedding_list = embedding_list
+
+    @property
+    def frontier_edges(self):
+        for node_id in self.current_graph:
+            edges = self.current_graph.edge[node_id]
+            for neighbor_id in self.source_graph.neighbors_iter(node_id):
+                if neighbor_id not in edges:
+                    yield (node_id, neighbor_id)

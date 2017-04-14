@@ -13,7 +13,7 @@ def find_frequent_subgraphs(initial_gaston_objects, min_freq):
     i = 0
 
     # level order search
-    while len(current_level) > 0 and i < 5:
+    while len(current_level) > 0:
         next_level = []
 
         print()
@@ -33,7 +33,7 @@ def find_frequent_subgraphs(initial_gaston_objects, min_freq):
             if _is_frequent(frequencies, embedding_list, min_freq):
                 frequent_subgraphs[embedding_list] = subgraph
                 next_level.extend(_next_gaston_object(waiting[embedding_list]))
-                waiting[embedding_list] = []
+                del waiting[embedding_list]
 
         current_level = next_level
 
