@@ -22,12 +22,24 @@ class SearchTestCase(unittest.TestCase):
         graph_b.add_edge(2, 3, label=23)
         self.small_graph = nx.freeze(graph_b)
     
-    def test_find_frequent_subgraphs_in_tiny_graph(self):
+    # def test_find_frequent_subgraphs_in_tiny_graph(self):
+
+    #     min_freq = 0
+    #     input_graphs = [self.tiny_graph]
+
+    #     expected_frequencies = {(0,): 2, (0, 0, 0): 1}
+
+    #     gaston_objects = factory.initial_nodes(input_graphs)
+    #     frequent_subgraphs, frequencies = search.find_frequent_subgraphs(gaston_objects, min_freq)
+        
+    #     self.assertEqual(frequencies, expected_frequencies)
+
+    def test_find_frequent_subgraphs_in_small_graph(self):
 
         min_freq = 0
-        input_graphs = [self.tiny_graph]
+        input_graphs = [self.small_graph]
 
-        expected_frequencies = {(1,): 1, (2,): 1, (1, 12, 2): 1}
+        expected_frequencies = {(0,): 2, (0, 0, 0): 1}
 
         gaston_objects = factory.initial_nodes(input_graphs)
         frequent_subgraphs, frequencies = search.find_frequent_subgraphs(gaston_objects, min_freq)
