@@ -46,7 +46,7 @@ def _update_waiting(waiting_list, embedding_list, fragment):
         waiting_list[embedding_list].append(fragment)
 
 def _is_frequent(frequencies, embedding_list, min_freq):
-    return frequencies[embedding_list] > min_freq
+    return frequencies[embedding_list] >= min_freq
 
 def _next_fragment(waiting_list):
     for fragment in waiting_list:

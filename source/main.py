@@ -30,14 +30,41 @@ Create GastonGraph for each input graph
 import functools
 import networkx as nx
 import matplotlib.pyplot as plt
-import factory
-from search import find_frequent_subgraphs
+
+import source.factory as factory
+import source.search as search
+
+ORIG_CHEM_DATASET = 'test_files/Chemical_340.txt'
+SMALL_DATASET = 'test_files/small_chemical.txt'
+
+OUTPUT_FILEPATH = "output_files/output.txt"
+
+def gaston():
+    min_freq = 10
+    graphs = read_line_graphs(SMALL_DATASET)
+
+    print("Graph count: {}, total nodes: {}, total edges: {}".format(
+        len(graphs), count_total_nodes(graphs), count_total_edges(graphs)))
+    print("Unique nodes: {}, unique edges: {}".format(
+        count_unique_nodes(graphs), count_unique_edges(graphs)))
+
+    # for graph in graphs:
+    #     nx.draw_networkx(graph)
+    #     # nx.draw_networkx_labels(graph)
+    #     plt.show()
+
+    fragments = factory.initial_nodes(graphs)
+    frequent_subgraphs, frequencies = search.find_frequent_subgraphs(fragments, min_freq)
+
+    for embedding_list, subgraph in frequent_subgraphs.items():
+        frequency = frequencies[embedding_list]
+        print("embedding_list: {}, frequency: {}".format(''.join(embedding_list), frequency))
+
+        nx.write_gml(subgraph, OUTPUT_FILEPATH)
 
 def read_line_graphs(file_path):
     """
-    Reads an LineGraph file and converts it to a list of NetworkX Graph Objects
-    :param file: LineGraph file to read
-    :return: A list of LineGraph objects
+    Returns a list of NetworkX graph objects read from a line graph file.
     """
     graph_map = {}
 
@@ -67,28 +94,6 @@ def read_line_graphs(file_path):
 
     # Return frozen graphs
     return [nx.freeze(graph) for graph in graph_map.values()]
-
-# def remove_infrequent_nodes(graphs, min_freq):
-
-#     node_frequency = Counter(node for graph in graphs for node in graph)
-#     infrequent_node_labels = [node_label for node_label, count in node_frequency.items() if count <= min_freq]
-
-#     # remove infrequent nodes
-#     for graph in graphs:
-#         for node in graph.nodes():
-#             if node in infrequent_node_labels:
-#                 graph.remove_node(node)
-
-# def remove_infrequent_edges(graphs, min_freq):
-
-#     edge_frequency = Counter(d['label'] for graph in graphs for _, _, d in graph.edges_iter(data=True))
-#     infrequent_edge_labels = [edge_label for edge_label, count in edge_frequency.items() if count <= min_freq]
-
-#     # remove infrequent edges
-#     for graph in graphs:
-#         for v1, v2, data in graph.edges(data=True):
-#             if data['label'] in infrequent_edge_labels:
-#                 graph.remove_edge(v1, v2)
 
 def count_total_nodes(graphs):
     return functools.reduce(lambda total, graph: total + graph.number_of_nodes(), graphs, 0)
@@ -162,39 +167,3 @@ def count_unique_edges(graphs):
 #                 # node refinement leg
 #                 candidate_leg.embedding_list.append(k, neighbor, t.graph)
 #     return [candidate for candidate in candidate_legs if candidate is frequent]
-
-ORIG_CHEM_DATASET = '../test_files/Chemical_340.txt'
-SMALL_DATASET = '../test_files/small_chemical.txt'
-
-def main():
-    min_freq = 11
-    graphs = read_line_graphs(SMALL_DATASET)
-
-    print(count_total_nodes(graphs))
-    print(count_total_edges(graphs))
-
-    # remove_infrequent_nodes(graphs, min_freq)
-    # remove_infrequent_edges(graphs, min_freq)
-
-    # print(count_total_nodes(graphs))
-    # print(count_total_edges(graphs))
-
-    print("Graph count: {}".format(len(graphs)))
-    print(count_unique_nodes(graphs))
-    print(count_unique_edges(graphs))
-
-    # for graph in graphs:
-    #     nx.draw_networkx(graph)
-    #     # nx.draw_networkx_labels(graph)
-    #     plt.show()
-
-    gaston_objects = factory.initial_nodes(graphs)
-    frequent_subgraphs, frequencies = find_frequent_subgraphs(gaston_objects, min_freq)
-
-    for embedding_list, subgraph in frequent_subgraphs.items():
-        frequency = frequencies[embedding_list]
-        print("embedding_list: {}, frequency: {}".format(''.join(embedding_list), frequency))
-    
-    
-if __name__ == "__main__":
-    main()
