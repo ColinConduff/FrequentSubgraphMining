@@ -27,85 +27,94 @@ Create GastonGraph for each input graph
         Create Path
 
 """
-import functools
-import networkx as nx
-import matplotlib.pyplot as plt
+import sys, getopt
 
+import source.graph as graph_module
 import source.factory as factory
 import source.search as search
 
-ORIG_CHEM_DATASET = 'test_files/Chemical_340.txt'
-SMALL_DATASET = 'test_files/small_chemical.txt'
+HELP_TEXT = 'gaston.py -s <min support> -i <inputfile> -o <outputfile> -c <no cycles> -t <no trees>'
 
-OUTPUT_FILEPATH = "output_files/output.txt"
+def command_line_interface(argv):
+    """
+    original command line arguments:
+    gaston (min support) (input file) (output file)
+    gaston 7 Chemical_340 Chemical_340.out
+    -m i: specify that the largest frequent pattern to be examined has i nodes
+    -t:   only output frequent paths and trees, no cyclic graphs
+    -p:   only output frequent paths, no trees and cyclic graphs
+    """
 
-def gaston():
-    min_freq = 10
-    graphs = read_line_graphs(SMALL_DATASET)
+    min_support = None
+    input_file = None
+    output_file = None
+    dont_generate_cycles = False
+    dont_generate_trees = False
 
-    print("Graph count: {}, total nodes: {}, total edges: {}".format(
-        len(graphs), count_total_nodes(graphs), count_total_edges(graphs)))
-    print("Unique nodes: {}, unique edges: {}".format(
-        count_unique_nodes(graphs), count_unique_edges(graphs)))
+    try:
+        opts, _ = getopt.getopt(argv, "hs:m:i:o:ct")
+    except getopt.GetoptError:
+        print(HELP_TEXT)
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print(HELP_TEXT)
+            sys.exit()
+        elif opt == "-s":
+            min_support = int(arg)
+        elif opt == "-i":
+            input_file = arg
+        elif opt == "-o":
+            output_file = arg
+        elif opt == "-c":
+            dont_generate_cycles = True
+        elif opt == "-t":
+            dont_generate_trees = True
 
-    # for graph in graphs:
-    #     nx.draw_networkx(graph)
-    #     # nx.draw_networkx_labels(graph)
-    #     plt.show()
+    if input_file is None or min_support is None:
+        print("Input file and minimum support must be specified.")
+        print(HELP_TEXT)
+        sys.exit(2)
+    elif min_support <= 0:
+        print("Minimum support must be greater than 0.")
+        sys.exit(2)
+
+    print("\nMinimum Support:{}".format(min_support))
+    
+    if dont_generate_cycles:
+        print("Cycles will not be generated.")
+
+    if dont_generate_trees:
+        print("Trees will not be generated.")
+
+    gaston(min_support, input_file, output_file, dont_generate_cycles, dont_generate_trees)
+
+def gaston(min_support, input_file, 
+           output_file=None, dont_generate_cycles=False, dont_generate_trees=False):
+
+    graphs = graph_module.read_line_graphs(input_file)
+    min_frequency = int(min_support * len(graphs))
+    if min_frequency < 1:
+        min_frequency = 1
+
+    print("Minimum Frequency: {}".format(min_frequency))
+    print("Total - graphs: {}, nodes: {}, edges: {}".format(
+        len(graphs), graph_module.count_total_nodes(graphs), graph_module.count_total_edges(graphs)))
+    print("Unique - nodes: {}, edges: {}\n".format(
+        graph_module.count_unique_nodes(graphs), graph_module.count_unique_edges(graphs)))
 
     fragments = factory.initial_nodes(graphs)
-    frequent_subgraphs, frequencies = search.find_frequent_subgraphs(fragments, min_freq)
+    frequent_subgraphs, frequencies = search.find_frequent_subgraphs(fragments,
+                                                                     min_frequency,
+                                                                     dont_generate_cycles,
+                                                                     dont_generate_trees)
 
     for embedding_list, subgraph in frequent_subgraphs.items():
         frequency = frequencies[embedding_list]
         print("embedding_list: {}, frequency: {}".format(''.join(embedding_list), frequency))
 
-        nx.write_gml(subgraph, OUTPUT_FILEPATH)
-
-def read_line_graphs(file_path):
-    """
-    Returns a list of NetworkX graph objects read from a line graph file.
-    """
-    graph_map = {}
-
-    with open(file_path, "r") as f:
-        graph_id = 0
-
-        for line in f:
-            line = line.strip()
-            characters = line.split(" ")
-
-            if line.startswith("t #"):
-                graph_id += 1
-                graph = nx.Graph(id=graph_id, embeddings=[])
-                graph_map[graph_id] = graph
-
-            elif line.startswith("v"):
-                label = " ".join(characters[2:]).strip('\'')
-                graph_map[graph_id].add_node(characters[1], label=label)
-
-            elif line.startswith("e"):
-                label = " ".join(characters[3:]).strip('\'')
-                graph_map[graph_id].add_edge(characters[1], characters[2], label=label)
-
-            elif line.startswith("#=>"):
-                embedding = characters[1]
-                graph_map[graph_id].graph['embeddings'].append(embedding)
-
-    # Return frozen graphs
-    return [nx.freeze(graph) for graph in graph_map.values()]
-
-def count_total_nodes(graphs):
-    return functools.reduce(lambda total, graph: total + graph.number_of_nodes(), graphs, 0)
-
-def count_total_edges(graphs):
-    return functools.reduce(lambda total, graph: total + graph.number_of_edges(), graphs, 0)
-
-def count_unique_nodes(graphs):
-    return len(set(data['label'] for graph in graphs for _,data in graph.nodes_iter(data=True)))
-
-def count_unique_edges(graphs):
-    return len(set(edge['label'] for graph in graphs for _,_,edge in graph.edges_iter(data=True)))
+    if output_file is not None:
+        graph_module.write_line_graphs(frequent_subgraphs.values(), output_file)
 
 # def find_paths(gaston_subgraph):
 #     for frontier_edge in gaston_subgraph.frontier_edges:

@@ -1,35 +1,62 @@
 
 from collections import deque
+from enum import IntEnum
+
 import source.factory as factory
+from source.node import Node
+from source.path import Path
+from source.tree import Tree
+from source.cycle import Cycle
 
-def find_frequent_subgraphs(initial_fragments, min_freq):
+class Level(IntEnum):
+    NODE = 0
+    PATH = 1
+    TREE = 2
+    CYCLE = 3
 
-    # combine these into a namedtuple
+def find_frequent_subgraphs(initial_node_fragments, min_freq, 
+                            dont_generate_cycles=False, dont_generate_trees=False):
+    """
+    Perform level order search where: 
+        level 0 contains nodes, 
+        level 1 contains paths, 
+        level 2 contains trees, 
+        level 3 contains cycles.
+    """
+
     frequencies = {} # {embedding_list : frequency}
     frequent_subgraphs = {} # {embedding_list: subgraph}
-    waiting = {} # {embedding_list: [fragments]}
 
-    queue = deque(initial_fragments)
+    levels = (Level.NODE, Level.PATH, Level.TREE, Level.CYCLE)
+    queues = (deque(initial_node_fragments), deque(), deque(), deque())
+
+    # after each queue remove infrequent fragments from source graphs
 
     # i = 0
 
-    while len(queue) > 0:
-        # print()
-        # print("iterations: {}".format(i))
-        # i += 1
+    for level in levels:
+        waiting = {} # {embedding_list: [fragments]} contains fragments that may be frequent
 
-        fragment = queue.popleft()
-        embedding_list = fragment.embedding_list
-        # print(embedding_list)
-        subgraph = fragment.current_graph
+        while len(queues[level]) > 0:
+            # print()
+            # print("iterations: {}".format(i))
+            # i += 1
 
-        _update_frequencies(frequencies, embedding_list)
-        _update_waiting(waiting, embedding_list, fragment)
+            fragment = queues[level].popleft()
+            embedding_list = fragment.embedding_list
+            # print(embedding_list)
+            subgraph = fragment.current_graph
 
-        if _is_frequent(frequencies, embedding_list, min_freq):
-            frequent_subgraphs[embedding_list] = subgraph
-            queue.extend(_next_fragment(waiting[embedding_list]))
-            del waiting[embedding_list]
+            _update_frequencies(frequencies, embedding_list)
+            _update_waiting(waiting, embedding_list, fragment)
+
+            if _is_frequent(frequencies, embedding_list, min_freq):
+                frequent_subgraphs[embedding_list] = subgraph
+
+                for next_fragment in _next_fragments(waiting[embedding_list]):
+                    queues[next_fragment.queue_level].append(next_fragment)
+
+                del waiting[embedding_list]
 
     return frequent_subgraphs, frequencies
 
@@ -48,7 +75,7 @@ def _update_waiting(waiting_list, embedding_list, fragment):
 def _is_frequent(frequencies, embedding_list, min_freq):
     return frequencies[embedding_list] >= min_freq
 
-def _next_fragment(waiting_list):
+def _next_fragments(waiting_list):
     for fragment in waiting_list:
         for edge in fragment.frontier_edges:
             next_obj = factory.apply_refinement(fragment, edge)

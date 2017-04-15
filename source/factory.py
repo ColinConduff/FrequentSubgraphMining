@@ -5,21 +5,8 @@ from source.node import Node
 from source.path import Path
 from source.tree import Tree
 from source.cycle import Cycle
-import source.helper as helper
+import source.graph as graph_module
 import source.embedding as embedding
-
-def create_nx_graph(origin_id, origin_label, target_id, target_label, edge_label):
-    graph = nx.Graph()
-    graph.add_node(origin_id, label=origin_label)
-    graph.add_node(target_id, label=target_label)
-    graph.add_edge(origin_id, target_id, label=edge_label)
-    return nx.freeze(graph)
-
-def extend_nx_graph(prev_graph, origin_node_id, target_node_id, node_label, edge_label):
-    graph = nx.Graph(prev_graph)
-    graph.add_node(target_node_id, label=node_label)
-    graph.add_edge(origin_node_id, target_node_id, label=edge_label)
-    return nx.freeze(graph)
 
 def initial_nodes(graphs):
     return [Node(node_id, source_graph) for source_graph in graphs for node_id in source_graph]
@@ -59,7 +46,7 @@ def _create_path_from_node(node_fragment, appending_node_id):
     if appending_node_label < start_node_label:
         return None
 
-    current_graph = create_nx_graph(source_node_id, start_node_label, 
+    current_graph = graph_module.create_nx_graph(source_node_id, start_node_label, 
                                             appending_node_id, appending_node_label, 
                                             edge_label)
 
@@ -97,7 +84,7 @@ def _append_to_path(prev_path, new_back_id):
     # if total_symmetry == -1 or edge1 == new_edge and back_symmetry == -1:
     #     return None
 
-    current_graph = extend_nx_graph(prev_path.current_graph, prev_path.back_node_id, new_back_id, 
+    current_graph = graph_module.extend_nx_graph(prev_path.current_graph, prev_path.back_node_id, new_back_id, 
                                            target_node_label, target_edge_label)
 
     # Find the embedding that begins at the previous path's back node
@@ -134,7 +121,7 @@ def _prepend_node_to_path(prev_path, new_source_node_id):
     #     return None
 
     # Incorrect order if graph is directed
-    current_graph = extend_nx_graph(prev_path.current_graph, prev_path.source_node_id, new_source_node_id, 
+    current_graph = graph_module.extend_nx_graph(prev_path.current_graph, prev_path.source_node_id, new_source_node_id, 
                                            new_node_label, new_edge_label)
     
     # Find the embedding that begins at the previous path's start node
@@ -165,7 +152,7 @@ def _create_tree(source_graph, prev_graph, root_id, prev_frontier_edges, origin_
     new_node_label = source_graph.node[target_id]['label']
     new_edge_label = source_graph.edge[origin_id][target_id]['label']
 
-    current_graph = extend_nx_graph(prev_graph, origin_id, target_id, 
+    current_graph = graph_module.extend_nx_graph(prev_graph, origin_id, target_id, 
                                            new_node_label, new_edge_label)
 
     embedding_list = embedding.create_embedding_list_if_unique(current_graph, 
@@ -188,7 +175,7 @@ def _create_cycle(fragment, origin_id, target_id):
     new_node_label = source_graph.node[target_id]['label']
     new_edge_label = source_graph.edge[origin_id][target_id]['label']
 
-    current_graph = extend_nx_graph(prev_graph, origin_id, target_id, 
+    current_graph = graph_module.extend_nx_graph(prev_graph, origin_id, target_id, 
                                     new_node_label, new_edge_label)
 
     embedding_list = embedding.create_embedding_list_if_unique(current_graph, 

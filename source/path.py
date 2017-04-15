@@ -17,6 +17,11 @@ class Path(Fragment):
     def symmetries(self):
         return (self.total_symmetry, self.front_symmetry, self.back_symmetry)
 
+    @property
+    def queue_level(self):
+        from source.search import Level
+        return Level.PATH
+
     @staticmethod
     def compute_symmetry(embedding_list, reversed_list=None):
         """ O(n) method for calculating the symmetry  """
