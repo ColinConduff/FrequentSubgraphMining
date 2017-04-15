@@ -1,18 +1,17 @@
-class Path(object):
-    def __init__(self, start_node_id, back_node_id, current_graph, 
+
+from source.fragment import Fragment
+
+class Path(Fragment):
+
+    def __init__(self, source_node_id, back_node_id, current_graph, 
                      source_graph, embedding_list, 
                      total_symmetry, front_symmetry, back_symmetry):
-        self.start_node_id, self.back_node_id, self.current_graph = start_node_id, back_node_id, current_graph
-        self.source_graph, self.embedding_list = source_graph, embedding_list
-        self.total_symmetry, self.front_symmetry, self.back_symmetry = total_symmetry, front_symmetry, back_symmetry
 
-    @property
-    def frontier_edges(self):
-        for node_id in self.current_graph:
-            edges = self.current_graph.edge[node_id]
-            for neighbor_id in self.source_graph.neighbors_iter(node_id):
-                if neighbor_id not in edges:
-                    yield (node_id, neighbor_id)
+        super().__init__(source_node_id, current_graph, source_graph, embedding_list)
+        self.back_node_id = back_node_id
+        self.total_symmetry = total_symmetry
+        self.front_symmetry = front_symmetry
+        self.back_symmetry = back_symmetry
     
     @property
     def symmetries(self):

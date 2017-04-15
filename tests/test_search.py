@@ -22,26 +22,36 @@ class SearchTestCase(unittest.TestCase):
         graph_b.add_edge(2, 3, label=23)
         self.small_graph = nx.freeze(graph_b)
     
-    # def test_find_frequent_subgraphs_in_tiny_graph(self):
-
-    #     min_freq = 0
-    #     input_graphs = [self.tiny_graph]
-
-    #     expected_frequencies = {(0,): 2, (0, 0, 0): 1}
-
-    #     gaston_objects = factory.initial_nodes(input_graphs)
-    #     frequent_subgraphs, frequencies = search.find_frequent_subgraphs(gaston_objects, min_freq)
-        
-    #     self.assertEqual(frequencies, expected_frequencies)
-
-    def test_find_frequent_subgraphs_in_small_graph(self):
+    def test_find_frequent_subgraphs_in_tiny_graph(self):
 
         min_freq = 0
-        input_graphs = [self.small_graph]
+        input_graphs = [self.tiny_graph]
 
         expected_frequencies = {(0,): 2, (0, 0, 0): 1}
 
         gaston_objects = factory.initial_nodes(input_graphs)
         frequent_subgraphs, frequencies = search.find_frequent_subgraphs(gaston_objects, min_freq)
         
+        self.assertEqual(frequencies, expected_frequencies)
+
+    def test_find_frequent_subgraphs_in_small_graph(self):
+
+        min_freq = 0
+        input_graphs = [self.small_graph]
+
+        expected_frequencies = {
+            (0,): 2,
+            (0, 0, 0): 1,
+            (0, 0, 0, 23, 3): 1,
+            (0, 0, 0, 23, 3, 13, 0): 1,
+            (0, 13, 3): 1,
+            (0, 13, 3, 23, 0): 1,
+            (0, 23, 3): 1,
+            (3,): 1
+        }
+
+        gaston_objects = factory.initial_nodes(input_graphs)
+        frequent_subgraphs, frequencies = search.find_frequent_subgraphs(gaston_objects, min_freq)
+        
+
         self.assertEqual(frequencies, expected_frequencies)

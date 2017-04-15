@@ -1,14 +1,6 @@
-class Tree(object):
-    def __init__(self, root_node_id, current_graph, 
-                       source_graph, embedding_list):
-        self.root_node_id, self.current_graph = root_node_id, current_graph
-        self.source_graph = source_graph
-        self.embedding_list = embedding_list
 
-    @property
-    def frontier_edges(self):
-        for node_id in self.current_graph:
-            edges = self.current_graph.edge[node_id]
-            for neighbor_id in self.source_graph.neighbors_iter(node_id):
-                if neighbor_id not in edges:
-                    yield (node_id, neighbor_id)
+from source.fragment import Fragment
+
+class Tree(Fragment):
+    def __init__(self, source_node_id, current_graph, source_graph, embedding_list):
+        super().__init__(source_node_id, current_graph, source_graph, embedding_list)
