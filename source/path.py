@@ -2,10 +2,11 @@
 from source.fragment import Fragment
 
 class Path(Fragment):
+    """ A fragment containing a path subgraph. """
 
-    def __init__(self, source_node_id, back_node_id, current_graph, 
-                     source_graph, embedding_list, 
-                     total_symmetry, front_symmetry, back_symmetry):
+    def __init__(self, source_node_id, back_node_id, current_graph,
+                 source_graph, embedding_list,
+                 total_symmetry, front_symmetry, back_symmetry):
 
         super().__init__(source_node_id, current_graph, source_graph, embedding_list)
         self.back_node_id = back_node_id
@@ -17,13 +18,14 @@ class Path(Fragment):
         return "Path"
     
     @property
-    def symmetries(self):
-        return (self.total_symmetry, self.front_symmetry, self.back_symmetry)
-
-    @property
     def queue_level(self):
+        """ A property to specify the search queue containing path fragments. """
         from source.search import Level
         return Level.PATH
+
+    @property
+    def symmetries(self):
+        return (self.total_symmetry, self.front_symmetry, self.back_symmetry)
 
     @staticmethod
     def compute_symmetry(embedding_list, reversed_list=None):

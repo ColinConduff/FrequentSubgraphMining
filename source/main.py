@@ -1,31 +1,9 @@
-
 """
-Gaston finds all frequent subgraphs by using a level-wise approach in which first simple paths are considered, 
+"Gaston finds all frequent subgraphs by using a level-wise approach in which first simple paths are considered, 
 then more complex trees and finally the most complex cyclic graphs. It appears that in practice most frequent 
 graphs are not actually very complex structures; Gaston uses this quickstart observation to organize the search 
 space efficiently. To determine the frequency of graphs, Gaston employs an occurrence list based approach in 
-which all occurrences of a small set of graphs are stored in main memory.
-
-Parsemis approach:
-
-Parse input into graphs
-Mine fragments from the graphs
-
-Create database
-    - Compute frequency of nodes and labels
-    - Sort by frequency
-    - Remove infrequent nodes and labels
-
-Create GastonGraph for each input graph
-    For each node
-        if node_label does not already have a path
-        Create subgraph
-        Add node to subgraph
-        Create Refinement
-        Create Fragment
-        Create Leg 
-        Create Path
-
+which all occurrences of a small set of graphs are stored in main memory." - Siegfried Nijssen (Gaston author)
 """
 import sys, getopt
 from collections import Counter
@@ -38,6 +16,13 @@ HELP_TEXT = 'main.py -s <min support> -i <inputfile> -o <outputfile> -c <no cycl
 
 def command_line_interface(argv):
     """
+    A command line interface for interacting with the gaston python implementation.
+    Args:
+        min_support: a float or integer
+        input_file: file path to a text file in line graph format
+        output_file: file path to output frequent subgraphs in line graph format
+        dont_generate_cycles: a flag to specify that cycles should not be generated
+        don_generate_trees: a flag to specify that trees should not be generated
     """
 
     min_support = None
@@ -82,15 +67,31 @@ def command_line_interface(argv):
     if dont_generate_trees:
         print("Trees will not be generated.")
 
-    frequent_output = gaston(min_support, input_file, output_file,
-                             dont_generate_cycles, dont_generate_trees)
+    frequent_output = gaston(min_support, input_file,
+                             dont_generate_cycles, dont_generate_trees,
+                             should_print_graph_information=True)
+
+    if output_file is not None:
+        write_frequent_subgraphs_to_file_path(output_file, frequent_output)
 
     print_statistics(frequent_output)
 
-def gaston(min_support, input_file, 
-           output_file=None, dont_generate_cycles=False, dont_generate_trees=False):
+def gaston(min_support, input_file,
+           dont_generate_cycles=False, dont_generate_trees=False,
+           should_print_graph_information=False):
     """
-    Returns a dictionary of the form {embedding_list: (subgraph, graph type, frequency)}
+    Reads graphs from a line graph file and finds frequently occurring
+    subgraphs with support > min_support.
+
+    Args:
+        min_support: a float specifying the minimum support
+        input_file: a file path to the input file containing line graphs
+        dont_generate_cycles: a flag specifying whether to generate cycles
+        dont_generate_trees: a flag specifying whether to generate trees
+        should_print_graph_information: a flag specifying whether to print graph info
+
+    Returns:
+        a dictionary of the form {embedding_list: (subgraph, graph type, frequency)}
     """
 
     graphs = graph_module.read_line_graphs(input_file)
@@ -98,25 +99,31 @@ def gaston(min_support, input_file,
     if min_frequency < 1:
         min_frequency = 1
 
+    if should_print_graph_information:
+        print_graph_information(graphs, min_frequency)
+
+    fragments = factory.initial_node_fragments(graphs)
+    return search.find_frequent_subgraphs(fragments, min_frequency,
+                                          dont_generate_cycles, dont_generate_trees)
+
+def print_graph_information(graphs, min_frequency):
+    """ Prints relevant graph information such as min frequency and counts. """
     print("\nMinimum Frequency: {}".format(min_frequency))
     print("Total - graphs: {}, nodes: {}, edges: {}".format(
-        len(graphs), graph_module.count_total_nodes(graphs), graph_module.count_total_edges(graphs)))
+        len(graphs),
+        graph_module.count_total_nodes(graphs),
+        graph_module.count_total_edges(graphs)))
+
     print("Unique - nodes: {}, edges: {}\n".format(
         graph_module.count_unique_nodes(graphs), graph_module.count_unique_edges(graphs)))
 
-    fragments = factory.initial_nodes(graphs)
-    frequent_output = search.find_frequent_subgraphs(fragments,
-                                                     min_frequency,
-                                                     dont_generate_cycles,
-                                                     dont_generate_trees)
-
-    if output_file is not None:
-        frequent_graph_iter = iter(graph for graph, _, _ in frequent_output.values())
-        graph_module.write_line_graphs(frequent_graph_iter, output_file)
-
-    return frequent_output
+def write_frequent_subgraphs_to_file_path(output_file, frequent_output):
+    """ Writes frequently occurring subgraphs to the output filepath. """
+    frequent_graph_iter = iter(graph for graph, _, _ in frequent_output.values())
+    graph_module.write_line_graphs(frequent_graph_iter, output_file)
 
 def print_statistics(frequent_output):
+    """ Prints frequencies by graph type and embedding list. """
     graph_type_frequency = Counter(graph_type for _, graph_type, _ in frequent_output.values())
 
     print("Frequencies:")

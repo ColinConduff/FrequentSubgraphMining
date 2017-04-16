@@ -29,9 +29,10 @@ class SearchTestCase(unittest.TestCase):
 
         expected_frequencies = {(0,): 2, (0, 0, 0): 1}
 
-        gaston_objects = factory.initial_nodes(input_graphs)
-        frequent_subgraphs, frequencies = search.find_frequent_subgraphs(gaston_objects, min_freq)
-        
+        fragments = factory.initial_node_fragments(input_graphs)
+        frequent_output = search.find_frequent_subgraphs(fragments, min_freq)
+        frequencies = {embedding: frequent_output[embedding][2] for embedding in frequent_output}
+
         self.assertEqual(frequencies, expected_frequencies)
 
     def test_find_frequent_subgraphs_in_small_graph(self):
@@ -42,17 +43,20 @@ class SearchTestCase(unittest.TestCase):
         expected_frequencies = {
             (0,): 2,
             (0, 0, 0): 1,
-            # (0, 0, 0, 13, 3): 1,
+            (0, 0, 0, 13, 3): 1,
             (0, 0, 0, 23, 3): 1,
-            # (0, 0, 0, 13, 3, 23, 0): 1,
-            (0, 0, 0, 23, 3, 13, 0): 1,
+            (0, 0, 0, 13, 3, 23, 0): 1,
+            # (0, 0, 0, 23, 3, 13, 0): 1,
             (0, 13, 3): 1,
             (0, 13, 3, 23, 0): 1,
             (0, 23, 3): 1,
             (3,): 1
         }
 
-        initial_fragments = factory.initial_nodes(input_graphs)
-        frequent_subgraphs, frequencies = search.find_frequent_subgraphs(initial_fragments, min_freq)
+        initial_fragments = factory.initial_node_fragments(input_graphs)
+        frequent_output = search.find_frequent_subgraphs(initial_fragments, min_freq)
+        frequencies = {embedding: frequent_output[embedding][2] for embedding in frequent_output}
+
+        print(frequencies)
 
         self.assertEqual(frequencies, expected_frequencies)

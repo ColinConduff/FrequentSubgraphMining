@@ -8,6 +8,11 @@ def draw_nx_graphs(graphs):
         # nx.draw_networkx_labels(graph)
         plt.show()
 
+def create_nx_node_graph(source_node_id, node_label):
+    current_graph = nx.Graph()
+    current_graph.add_node(source_node_id, label=node_label)
+    return nx.freeze(current_graph)
+
 def create_nx_graph(origin_id, origin_label, target_id, target_label, edge_label):
     graph = nx.Graph()
     graph.add_node(origin_id, label=origin_label)
@@ -51,9 +56,6 @@ def read_line_graphs(file_path):
                 embedding = characters[1]
                 graph_map[graph_id].graph['embeddings'].append(embedding)
 
-    # Return frozen graphs
-    # return [nx.freeze(graph) for graph in graph_map.values()]
-
     return graph_map.values()
 
 def write_line_graphs(graphs, file_path):
@@ -64,14 +66,14 @@ def write_line_graphs(graphs, file_path):
                 f.write("t # {}\n".format(graph.graph['id']))
             else:
                 f.write("t # {}\n".format(g_id))
-            
+
             node_dict = {}
-            
+
             for index, (node_id, data) in enumerate(graph.nodes_iter(data=True)):
                 node_dict[node_id] = index
                 node_label = data['label']
                 f.write("v {} {}\n".format(index, node_label))
-            
+
             for source, target, data in graph.edges_iter(data=True):
                 f.write("e {} {} {}\n".format(node_dict[source], node_dict[target], data['label']))
 
@@ -82,7 +84,7 @@ def count_total_edges(graphs):
     return functools.reduce(lambda total, graph: total + graph.number_of_edges(), graphs, 0)
 
 def count_unique_nodes(graphs):
-    return len(set(data['label'] for graph in graphs for _,data in graph.nodes_iter(data=True)))
+    return len(set(data['label'] for graph in graphs for _, data in graph.nodes_iter(data=True)))
 
 def count_unique_edges(graphs):
-    return len(set(edge['label'] for graph in graphs for _,_,edge in graph.edges_iter(data=True)))
+    return len(set(edge['label'] for graph in graphs for _, _, edge in graph.edges_iter(data=True)))

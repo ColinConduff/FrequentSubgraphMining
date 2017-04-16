@@ -8,20 +8,19 @@ from source.path import Path
 from source.tree import Tree
 from source.cycle import Cycle
 
-class Level(IntEnum):
-    NODE = 0
-    PATH = 1
-    TREE = 2
-    CYCLE = 3
-
-def find_frequent_subgraphs(initial_node_fragments, min_freq, 
+def find_frequent_subgraphs(initial_node_fragments, min_freq,
                             dont_generate_cycles=False, dont_generate_trees=False):
     """
-    Perform level order search where: 
-        level 0 contains nodes, 
-        level 1 contains paths, 
-        level 2 contains trees, 
-        level 3 contains cycles.
+    Perform a level-order search for frequently occurring subgraphs.
+
+    Levels:
+    level 0 contains nodes
+    level 1 contains paths
+    level 2 contains trees
+    level 3 contains cycles
+
+    Returns:
+        a dictionary of the form {embedding_list: (subgraph, graph_type, frequency)}
     """
 
     frequencies = {} # {embedding_list : frequency}
@@ -31,13 +30,12 @@ def find_frequent_subgraphs(initial_node_fragments, min_freq,
     queues = (deque(initial_node_fragments), deque(), deque(), deque())
 
     for level in levels:
-        print(level) ###########################
 
         if dont_generate_trees and level == Level.TREE or \
             dont_generate_cycles and level == Level.CYCLE:
             break
 
-        fragments_dict = {} # {embedding_list: [fragments]} contains fragments that may be frequent
+        fragments_dict = {} # {embedding_list: [fragments]}
 
         while len(queues[level]) > 0:
             fragment = queues[level].popleft()
@@ -49,6 +47,8 @@ def find_frequent_subgraphs(initial_node_fragments, min_freq,
             if _is_frequent(frequencies, embedding_list, min_freq):
                 frequent_fragments[embedding_list] = fragment
 
+                # Generate the next fragment and
+                # append it to the queue that corresponds to its graph type
                 for next_fragment in _next_fragments(fragments_dict[embedding_list],
                                                      dont_generate_cycles,
                                                      dont_generate_trees):
@@ -60,6 +60,13 @@ def find_frequent_subgraphs(initial_node_fragments, min_freq,
         _remove_from_source_graphs(fragments_dict.values())
 
     return {embedding: values for (embedding, values) in _output(frequent_fragments, frequencies)}
+
+class Level(IntEnum):
+    """ Constants specifying the queue corresponding to the graph type. """
+    NODE = 0
+    PATH = 1
+    TREE = 2
+    CYCLE = 3
 
 def _output(frequent_fragments, frequencies):
     for embedding, fragment in frequent_fragments.items():
@@ -81,9 +88,11 @@ def _is_frequent(frequencies, embedding_list, min_freq):
     return frequencies[embedding_list] >= min_freq
 
 def _next_fragments(fragments_dict, dont_generate_cycles, dont_generate_trees):
+    """ Returns fragments that can be produced by refining frequent fragments. """
     for fragment in fragments_dict:
         for edge in fragment.frontier_edges:
-            next_obj = factory.apply_refinement(fragment, edge, dont_generate_cycles, dont_generate_trees)
+            next_obj = factory.apply_refinement(fragment, edge,
+                                                dont_generate_cycles, dont_generate_trees)
             if next_obj is not None:
                 yield next_obj
 
