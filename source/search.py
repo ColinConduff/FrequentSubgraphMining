@@ -25,40 +25,45 @@ def find_frequent_subgraphs(initial_node_fragments, min_freq,
     """
 
     frequencies = {} # {embedding_list : frequency}
-    frequent_subgraphs = {} # {embedding_list: subgraph}
+    frequent_fragments = {} # {embedding_list: fragment}
 
     levels = (Level.NODE, Level.PATH, Level.TREE, Level.CYCLE)
     queues = (deque(initial_node_fragments), deque(), deque(), deque())
 
-    # after each queue remove infrequent fragments from source graphs
-
-    # i = 0
-
     for level in levels:
-        waiting = {} # {embedding_list: [fragments]} contains fragments that may be frequent
+        print(level) ###########################
+
+        if dont_generate_trees and level == Level.TREE or \
+            dont_generate_cycles and level == Level.CYCLE:
+            break
+
+        fragments_dict = {} # {embedding_list: [fragments]} contains fragments that may be frequent
 
         while len(queues[level]) > 0:
-            # print()
-            # print("iterations: {}".format(i))
-            # i += 1
-
             fragment = queues[level].popleft()
             embedding_list = fragment.embedding_list
-            # print(embedding_list)
-            subgraph = fragment.current_graph
 
             _update_frequencies(frequencies, embedding_list)
-            _update_waiting(waiting, embedding_list, fragment)
+            _update_fragments_dict(fragments_dict, embedding_list, fragment)
 
             if _is_frequent(frequencies, embedding_list, min_freq):
-                frequent_subgraphs[embedding_list] = subgraph
+                frequent_fragments[embedding_list] = fragment
 
-                for next_fragment in _next_fragments(waiting[embedding_list]):
+                for next_fragment in _next_fragments(fragments_dict[embedding_list],
+                                                     dont_generate_cycles,
+                                                     dont_generate_trees):
                     queues[next_fragment.queue_level].append(next_fragment)
 
-                del waiting[embedding_list]
+                del fragments_dict[embedding_list]
 
-    return frequent_subgraphs, frequencies
+        # The remaining fragments in fragments_dict are infrequent
+        _remove_from_source_graphs(fragments_dict.values())
+
+    return {embedding: values for (embedding, values) in _output(frequent_fragments, frequencies)}
+
+def _output(frequent_fragments, frequencies):
+    for embedding, fragment in frequent_fragments.items():
+        yield embedding, (fragment.current_graph, str(fragment), frequencies[embedding])
 
 def _update_frequencies(frequencies, embedding_list):
     if embedding_list in frequencies:
@@ -66,18 +71,25 @@ def _update_frequencies(frequencies, embedding_list):
     else:
         frequencies[embedding_list] = 1
 
-def _update_waiting(waiting_list, embedding_list, fragment):
-    if embedding_list not in waiting_list:
-        waiting_list[embedding_list] = [fragment]
+def _update_fragments_dict(fragments_dict, embedding_list, fragment):
+    if embedding_list not in fragments_dict:
+        fragments_dict[embedding_list] = [fragment]
     else:
-        waiting_list[embedding_list].append(fragment)
+        fragments_dict[embedding_list].append(fragment)
 
 def _is_frequent(frequencies, embedding_list, min_freq):
     return frequencies[embedding_list] >= min_freq
 
-def _next_fragments(waiting_list):
-    for fragment in waiting_list:
+def _next_fragments(fragments_dict, dont_generate_cycles, dont_generate_trees):
+    for fragment in fragments_dict:
         for edge in fragment.frontier_edges:
-            next_obj = factory.apply_refinement(fragment, edge)
+            next_obj = factory.apply_refinement(fragment, edge, dont_generate_cycles, dont_generate_trees)
             if next_obj is not None:
                 yield next_obj
+
+def _remove_from_source_graphs(nested_fragments):
+    for fragments in nested_fragments:
+        for fragment in fragments:
+            for node_id in fragment.current_graph:
+                if node_id in fragment.source_graph:
+                    fragment.source_graph.remove_node(node_id)

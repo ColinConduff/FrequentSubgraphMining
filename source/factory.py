@@ -9,34 +9,37 @@ import source.graph as graph_module
 import source.embedding as embedding
 
 def initial_nodes(graphs):
-    return [Node(node_id, source_graph) for source_graph in graphs for node_id in source_graph]
+    return iter(Node(node_id, source_graph) for source_graph in graphs for node_id in source_graph)
 
-def apply_refinement(fragment, edge):
+def apply_refinement(prev_fragment, edge, dont_generate_cycles, dont_generate_trees):
     """"""
     origin_id, target_id = edge
+    new_fragment = None
 
-    if isinstance(fragment, Node):
-        return _create_path_from_node(fragment, target_id)
+    if isinstance(prev_fragment, Node):
+        new_fragment = _create_path_from_node(prev_fragment, target_id)
     
-    elif target_id in fragment.current_graph:
-        return _create_cycle(fragment, origin_id, target_id)
+    elif target_id in prev_fragment.current_graph:
+        if not dont_generate_cycles:
+            new_fragment = _create_cycle(prev_fragment, origin_id, target_id)
     
-    elif isinstance(fragment, Path):
-        if origin_id == fragment.back_node_id:
-            return _append_to_path(fragment, target_id)
+    elif isinstance(prev_fragment, Path):
+        if origin_id == prev_fragment.back_node_id:
+            new_fragment = _append_to_path(prev_fragment, target_id)
     
-        elif origin_id == fragment.source_node_id:
-            _prepend_node_to_path(fragment, target_id)
-            # return None
+        elif origin_id == prev_fragment.source_node_id:
+            _prepend_node_to_path(prev_fragment, target_id)
     
-        else:
-            return _create_tree_from_path(fragment, origin_id, target_id)
+        elif not dont_generate_trees:
+            new_fragment = _create_tree_from_path(prev_fragment, origin_id, target_id)
 
-    elif isinstance(fragment, Tree):
-        return _create_tree_from_tree(fragment, origin_id, target_id)
+    elif isinstance(prev_fragment, Tree) and not dont_generate_trees:
+        new_fragment = _create_tree_from_tree(prev_fragment, origin_id, target_id)
+
+    return new_fragment
 
 def _create_path_from_node(node_fragment, appending_node_id):
-    source_node_id, frontier_edges, source_graph = node_fragment
+    source_node_id, source_graph = node_fragment.source_node_id, node_fragment.source_graph
 
     start_node_label = source_graph.node[source_node_id]['label']
     appending_node_label = source_graph.node[appending_node_id]['label']
@@ -121,14 +124,14 @@ def _prepend_node_to_path(prev_path, new_source_node_id):
     #     return None
 
     # Incorrect order if graph is directed
-    current_graph = graph_module.extend_nx_graph(prev_path.current_graph, prev_path.source_node_id, new_source_node_id, 
-                                           new_node_label, new_edge_label)
+    current_graph = graph_module.extend_nx_graph(prev_path.current_graph, prev_path.source_node_id, 
+                                                 new_source_node_id, new_node_label, new_edge_label)
     
     # Find the embedding that begins at the previous path's start node
     # The alt embedding beginning from the new start node will be created from a different fragment
-    embedding_list = embedding.create_embedding_list_if_unique(current_graph, 
-                                                               source_id=prev_path.source_node_id, 
-                                                               alt_source_id=new_source_node_id)
+    embedding_list = embedding.create_embedding_list_if_unique(current_graph,
+                                                               source_id=new_source_node_id,
+                                                               alt_source_id=prev_path.source_node_id)
     if embedding_list is None:
         return None
     

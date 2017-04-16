@@ -42,7 +42,9 @@ class SearchTestCase(unittest.TestCase):
         expected_frequencies = {
             (0,): 2,
             (0, 0, 0): 1,
+            # (0, 0, 0, 13, 3): 1,
             (0, 0, 0, 23, 3): 1,
+            # (0, 0, 0, 13, 3, 23, 0): 1,
             (0, 0, 0, 23, 3, 13, 0): 1,
             (0, 13, 3): 1,
             (0, 13, 3, 23, 0): 1,
@@ -50,8 +52,7 @@ class SearchTestCase(unittest.TestCase):
             (3,): 1
         }
 
-        gaston_objects = factory.initial_nodes(input_graphs)
-        frequent_subgraphs, frequencies = search.find_frequent_subgraphs(gaston_objects, min_freq)
-        
+        initial_fragments = factory.initial_nodes(input_graphs)
+        frequent_subgraphs, frequencies = search.find_frequent_subgraphs(initial_fragments, min_freq)
 
         self.assertEqual(frequencies, expected_frequencies)

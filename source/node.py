@@ -16,15 +16,15 @@ class Node(Fragment):
         embedding_list = tuple([node_label])
 
         super().__init__(source_node_id, current_graph, source_graph, embedding_list)
-    
-    def __iter__(self):
-        return iter((self.source_node_id, self.frontier_edges, self.source_graph))
 
     # def __eq__(self, other):
     #     return self.source_node_id == other.source_node_id
 
     # def __hash__(self):
     #     return hash(self.source_node_id)
+
+    def __str__(self):
+        return "Node"
 
     @property
     def queue_level(self):

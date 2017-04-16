@@ -28,21 +28,16 @@ Create GastonGraph for each input graph
 
 """
 import sys, getopt
+from collections import Counter
 
 import source.graph as graph_module
 import source.factory as factory
 import source.search as search
 
-HELP_TEXT = 'gaston.py -s <min support> -i <inputfile> -o <outputfile> -c <no cycles> -t <no trees>'
+HELP_TEXT = 'main.py -s <min support> -i <inputfile> -o <outputfile> -c <no cycles> -t <no trees>'
 
 def command_line_interface(argv):
     """
-    original command line arguments:
-    gaston (min support) (input file) (output file)
-    gaston 7 Chemical_340 Chemical_340.out
-    -m i: specify that the largest frequent pattern to be examined has i nodes
-    -t:   only output frequent paths and trees, no cyclic graphs
-    -p:   only output frequent paths, no trees and cyclic graphs
     """
 
     min_support = None
@@ -61,7 +56,7 @@ def command_line_interface(argv):
             print(HELP_TEXT)
             sys.exit()
         elif opt == "-s":
-            min_support = int(arg)
+            min_support = float(arg)
         elif opt == "-i":
             input_file = arg
         elif opt == "-o":
@@ -87,34 +82,51 @@ def command_line_interface(argv):
     if dont_generate_trees:
         print("Trees will not be generated.")
 
-    gaston(min_support, input_file, output_file, dont_generate_cycles, dont_generate_trees)
+    frequent_output = gaston(min_support, input_file, output_file,
+                             dont_generate_cycles, dont_generate_trees)
+
+    print_statistics(frequent_output)
 
 def gaston(min_support, input_file, 
            output_file=None, dont_generate_cycles=False, dont_generate_trees=False):
+    """
+    Returns a dictionary of the form {embedding_list: (subgraph, graph type, frequency)}
+    """
 
     graphs = graph_module.read_line_graphs(input_file)
     min_frequency = int(min_support * len(graphs))
     if min_frequency < 1:
         min_frequency = 1
 
-    print("Minimum Frequency: {}".format(min_frequency))
+    print("\nMinimum Frequency: {}".format(min_frequency))
     print("Total - graphs: {}, nodes: {}, edges: {}".format(
         len(graphs), graph_module.count_total_nodes(graphs), graph_module.count_total_edges(graphs)))
     print("Unique - nodes: {}, edges: {}\n".format(
         graph_module.count_unique_nodes(graphs), graph_module.count_unique_edges(graphs)))
 
     fragments = factory.initial_nodes(graphs)
-    frequent_subgraphs, frequencies = search.find_frequent_subgraphs(fragments,
-                                                                     min_frequency,
-                                                                     dont_generate_cycles,
-                                                                     dont_generate_trees)
-
-    for embedding_list, subgraph in frequent_subgraphs.items():
-        frequency = frequencies[embedding_list]
-        print("embedding_list: {}, frequency: {}".format(''.join(embedding_list), frequency))
+    frequent_output = search.find_frequent_subgraphs(fragments,
+                                                     min_frequency,
+                                                     dont_generate_cycles,
+                                                     dont_generate_trees)
 
     if output_file is not None:
-        graph_module.write_line_graphs(frequent_subgraphs.values(), output_file)
+        frequent_graph_iter = iter(graph for graph, _, _ in frequent_output.values())
+        graph_module.write_line_graphs(frequent_graph_iter, output_file)
+
+    return frequent_output
+
+def print_statistics(frequent_output):
+    graph_type_frequency = Counter(graph_type for _, graph_type, _ in frequent_output.values())
+
+    print("Frequencies:")
+    print("Nodes: {}".format(graph_type_frequency['Node']))
+    print("Paths: {}".format(graph_type_frequency['Path']))
+    print("Trees: {}".format(graph_type_frequency['Tree']))
+    print("Cycles: {}\n".format(graph_type_frequency['Cycle']))
+    
+    for embedding_list, (_, _, frequency) in frequent_output.items():
+        print("embedding_list: {}, frequency: {}".format(''.join(embedding_list), frequency))
 
 # def find_paths(gaston_subgraph):
 #     for frontier_edge in gaston_subgraph.frontier_edges:

@@ -12,6 +12,9 @@ class Path(Fragment):
         self.total_symmetry = total_symmetry
         self.front_symmetry = front_symmetry
         self.back_symmetry = back_symmetry
+
+    def __str__(self):
+        return "Path"
     
     @property
     def symmetries(self):

@@ -13,9 +13,10 @@ class Fragment(object):
     def frontier_edges(self):
         for node_id in self.current_graph:
             edges = self.current_graph.edge[node_id]
-            for neighbor_id in self.source_graph.neighbors_iter(node_id):
-                if neighbor_id not in edges:
-                    yield (node_id, neighbor_id)
+            if node_id in self.source_graph:
+                for neighbor_id in self.source_graph.neighbors_iter(node_id):
+                    if neighbor_id not in edges:
+                        yield (node_id, neighbor_id)
 
     def __eq__(self, other):
         pass
