@@ -11,9 +11,9 @@ def initial_node_fragments(graphs):
     return iter(Node(node_id, source_graph) for source_graph in graphs for node_id in source_graph)
 
 def apply_refinement(prev_fragment, edge, dont_generate_cycles, dont_generate_trees):
-    """ 
-    Create a new fragment by applying a refinement to a frequently occurring fragment. 
-    
+    """
+    Create a new fragment by applying a refinement to a frequently occurring fragment.
+
     Returns None if the refinement produces a duplicated fragment.
     Otherwise, returns a new fragment.
     """
@@ -36,8 +36,8 @@ def apply_refinement(prev_fragment, edge, dont_generate_cycles, dont_generate_tr
             new_fragment = _append_to_path(prev_fragment, target_id)
 
         # Create a path by prepending to a path fragment.
-        elif origin_id == prev_fragment.source_node_id:
-            new_fragment = _prepend_node_to_path(prev_fragment, target_id)
+        # elif origin_id == prev_fragment.source_node_id:
+        #     new_fragment = _prepend_node_to_path(prev_fragment, target_id)
 
         # Create a tree by appending to a path fragment.
         elif not dont_generate_trees:
@@ -71,6 +71,8 @@ def _create_path_from_node(node_fragment, appending_node_id):
                                                                alt_source_id=appending_node_id)
     if embedding_list is None:
         return None
+
+    # embedding_list = embedding.create_embedding_list(current_graph, node_fragment.source_node_id)
 
     # total_symmetry = 0 if appending_node_label == start_node_label else 1
 
@@ -109,11 +111,12 @@ def _append_to_path(prev_path, new_back_id):
                                                                alt_source_id=new_back_id)
     if embedding_list is None:
         return None
-    
+
+    # embedding_list = embedding.create_embedding_list(current_graph, prev_path.source_node_id)
+
     return Path(prev_path.source_node_id, new_back_id, current_graph,
                 prev_path.source_graph, embedding_list,
                 total_symmetry=0, front_symmetry=0, back_symmetry=0)
-
 
 def _prepend_node_to_path(prev_path, new_node_id):
 
@@ -147,6 +150,8 @@ def _prepend_node_to_path(prev_path, new_node_id):
     if embedding_list is None or prev_path.embedding_list > embedding_list:
         return None
 
+    # embedding_list = embedding.create_embedding_list(current_graph, prev_path.source_node_id)
+
     return Path(prev_path.source_node_id, prev_path.back_node_id, current_graph,
                 prev_path.source_graph, embedding_list,
                 total_symmetry=0, front_symmetry=0, back_symmetry=0)
@@ -154,12 +159,11 @@ def _prepend_node_to_path(prev_path, new_node_id):
 def _create_tree(prev_fragment, origin_id, target_id):
 
     source_graph = prev_fragment.source_graph
-    prev_graph = prev_fragment.current_graph
 
     new_node_label = source_graph.node[target_id]['label']
     new_edge_label = source_graph.edge[origin_id][target_id]['label']
 
-    current_graph = graph_module.extend_nx_graph(prev_graph, origin_id, target_id,
+    current_graph = graph_module.extend_nx_graph(prev_fragment.current_graph, origin_id, target_id,
                                                  new_node_label, new_edge_label)
 
     embedding_list = embedding.create_embedding_list_if_unique(current_graph,
@@ -167,6 +171,8 @@ def _create_tree(prev_fragment, origin_id, target_id):
                                                                alt_source_id=target_id)
     if embedding_list is None:
         return None
+
+    # embedding_list = embedding.create_embedding_list(current_graph, prev_fragment.source_node_id)
 
     return Tree(prev_fragment.source_node_id, current_graph, source_graph, embedding_list)
 
@@ -186,5 +192,7 @@ def _create_cycle(prev_fragment, origin_id, target_id):
                                                                alt_source_id=target_id)
     if embedding_list is None:
         return None
+
+    # embedding_list = embedding.create_embedding_list(current_graph, prev_fragment.source_node_id)
 
     return Cycle(prev_fragment.source_node_id, current_graph, source_graph, embedding_list)

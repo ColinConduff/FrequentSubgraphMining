@@ -1,6 +1,7 @@
 
 import source.graph as graph_module
 from source.fragment import Fragment
+from source.level import Level
 
 class Node(Fragment):
     """ A fragment containing a node subgraph. """
@@ -20,6 +21,5 @@ class Node(Fragment):
     @property
     def queue_level(self):
         """ A property to specify the search queue containing node fragments. """
-        from source.search import Level
         return Level.NODE
     

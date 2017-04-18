@@ -16,6 +16,13 @@ class Fragment(object):
         self.source_graph = source_graph
         self.embedding_list = embedding_list
 
+        # Ensure correctness of gaston algorithm using unique hash values for each subgraph/fragment
+        # Will be removed if correctness of faster methods are proven
+        self.hash_value = hash(tuple(
+            sorted((u, data['label']) for u, data in self.current_graph.nodes_iter(data=True)) +
+            sorted(data['label'] for _, _, data in self.current_graph.edges_iter(data=True))
+            ))
+
     @property
     def frontier_edges(self):
         """
@@ -28,3 +35,9 @@ class Fragment(object):
                 for neighbor_id in self.source_graph.neighbors_iter(node_id):
                     if neighbor_id not in edges:
                         yield (node_id, neighbor_id)
+
+    def __hash__(self):
+        return self.hash_value
+
+    def __eq__(self, other):
+        return self.hash_value == other.hash_value

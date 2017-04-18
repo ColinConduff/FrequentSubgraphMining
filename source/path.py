@@ -1,5 +1,6 @@
 
 from source.fragment import Fragment
+from source.level import Level
 
 class Path(Fragment):
     """ A fragment containing a path subgraph. """
@@ -20,7 +21,6 @@ class Path(Fragment):
     @property
     def queue_level(self):
         """ A property to specify the search queue containing path fragments. """
-        from source.search import Level
         return Level.PATH
 
     @property

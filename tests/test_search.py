@@ -10,7 +10,7 @@ class SearchTestCase(unittest.TestCase):
     SMALL_DATASET = '../test_files/small_chemical.txt'
 
     def setUp(self):
-        graph_a = nx.Graph()
+        graph_a = nx.Graph(id=1)
         graph_a.add_node(1, label=0)
         graph_a.add_node(2, label=0)
         graph_a.add_edge(1, 2, label=0)
@@ -45,8 +45,8 @@ class SearchTestCase(unittest.TestCase):
             (0, 0, 0): 1,
             (0, 0, 0, 13, 3): 1,
             (0, 0, 0, 23, 3): 1,
-            (0, 0, 0, 13, 3, 23, 0): 1,
-            # (0, 0, 0, 23, 3, 13, 0): 1,
+            # (0, 0, 0, 13, 3, 23, 3): 1,
+            (0, 0, 0, 23, 3, 13, 0): 1,
             (0, 13, 3): 1,
             (0, 13, 3, 23, 0): 1,
             (0, 23, 3): 1,
@@ -57,6 +57,6 @@ class SearchTestCase(unittest.TestCase):
         frequent_output = search.find_frequent_subgraphs(initial_fragments, min_freq)
         frequencies = {embedding: frequent_output[embedding][2] for embedding in frequent_output}
 
-        print(frequencies)
+        # print(frequencies)
 
         self.assertEqual(frequencies, expected_frequencies)

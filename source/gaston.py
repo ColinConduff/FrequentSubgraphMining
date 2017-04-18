@@ -5,76 +5,11 @@ graphs are not actually very complex structures; Gaston uses this quickstart obs
 space efficiently. To determine the frequency of graphs, Gaston employs an occurrence list based approach in 
 which all occurrences of a small set of graphs are stored in main memory." - Siegfried Nijssen (Gaston author)
 """
-import sys, getopt
 from collections import Counter
 
 import source.graph as graph_module
 import source.factory as factory
 import source.search as search
-
-HELP_TEXT = 'main.py -s <min support> -i <inputfile> -o <outputfile> -c <no cycles> -t <no trees>'
-
-def command_line_interface(argv):
-    """
-    A command line interface for interacting with the gaston python implementation.
-    Args:
-        min_support: a float or integer
-        input_file: file path to a text file in line graph format
-        output_file: file path to output frequent subgraphs in line graph format
-        dont_generate_cycles: a flag to specify that cycles should not be generated
-        don_generate_trees: a flag to specify that trees should not be generated
-    """
-
-    min_support = None
-    input_file = None
-    output_file = None
-    dont_generate_cycles = False
-    dont_generate_trees = False
-
-    try:
-        opts, _ = getopt.getopt(argv, "hs:m:i:o:ct")
-    except getopt.GetoptError:
-        print(HELP_TEXT)
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print(HELP_TEXT)
-            sys.exit()
-        elif opt == "-s":
-            min_support = float(arg)
-        elif opt == "-i":
-            input_file = arg
-        elif opt == "-o":
-            output_file = arg
-        elif opt == "-c":
-            dont_generate_cycles = True
-        elif opt == "-t":
-            dont_generate_trees = True
-
-    if input_file is None or min_support is None:
-        print("Input file and minimum support must be specified.")
-        print(HELP_TEXT)
-        sys.exit(2)
-    elif min_support <= 0:
-        print("Minimum support must be greater than 0.")
-        sys.exit(2)
-
-    print("\nMinimum Support:{}".format(min_support))
-    
-    if dont_generate_cycles:
-        print("Cycles will not be generated.")
-
-    if dont_generate_trees:
-        print("Trees will not be generated.")
-
-    frequent_output = gaston(min_support, input_file,
-                             dont_generate_cycles, dont_generate_trees,
-                             should_print_graph_information=True)
-
-    if output_file is not None:
-        write_frequent_subgraphs_to_file_path(output_file, frequent_output)
-
-    print_statistics(frequent_output)
 
 def gaston(min_support, input_file,
            dont_generate_cycles=False, dont_generate_trees=False,

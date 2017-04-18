@@ -6,7 +6,7 @@ import source.embedding as emb_module
 class EmbeddingTestCase(unittest.TestCase):
 
     def setUp(self):
-        graph = nx.Graph()
+        graph = nx.Graph(id=1)
         graph.add_node(1, label=0)
         graph.add_node(2, label=0)
         graph.add_edge(1, 2, label=0)

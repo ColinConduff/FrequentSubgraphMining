@@ -1,14 +1,14 @@
 
-def create_embedding_list(graph, source_id, source_node_label):
+def create_embedding_list(graph, source_id):
     """ Generalized, slow method for creating unique embedded lists for any type of graph. """
-    embedding_list = [source_node_label]
+    embedding_labels = [graph.node[source_id]['label']]
     embed_iter = _create_embedding_list(graph, visited=set(), node_id=source_id)
     
-    for _, (edge_label, neighbor_label) in embed_iter:
-        embedding_list.append(edge_label)
-        embedding_list.append(neighbor_label)
+    for node_id, (edge_label, neighbor_label) in embed_iter:
+        embedding_labels.append(edge_label)
+        embedding_labels.append(neighbor_label)
     
-    return tuple(embedding_list)
+    return tuple(embedding_labels)
 
 def create_embedding_list_if_unique(graph, source_id, alt_source_id):
     node_label = graph.node[source_id]['label']
@@ -19,13 +19,11 @@ def create_embedding_list_if_unique(graph, source_id, alt_source_id):
 
     # If a cycle is formed by wrapping back to source_id, source_id == alt_source_id
     elif node_label < alt_node_label or source_id == alt_source_id:
-        return create_embedding_list(graph, source_id, node_label)
+        return create_embedding_list(graph, source_id)
     else:
         return _embedding_list_with_comparison(graph, source_id, alt_source_id, node_label, alt_node_label)
     
 def _embedding_list_with_comparison(graph, source_id, alt_source_id, node_label, alt_node_label):
-
-    # print("_embedding_list_with_comparison")
 
     embedding_list = [node_label]
     source_node_ids = [source_id]
@@ -40,7 +38,6 @@ def _embedding_list_with_comparison(graph, source_id, alt_source_id, node_label,
         try:
             node_id, edge = next(embed_iter)
             embedding_list.extend(edge)
-            # print("node_id: {}, edge: {}".format(node_id, edge))
 
             if should_compare:
                 alt_node_id, alt_edge = next(alt_embed_iter)
@@ -69,8 +66,6 @@ def _create_embedding_list(graph, visited, node_id):
             visited.add((node_id, neighbor_id))
             visited.add((neighbor_id, node_id)) # if graph is undirected
 
-            # closing_edge_labels = [l for l in _closing_edge_labels(visited, node_id)]
-
             yield node_id, (edge_label, neighbor_label)
             yield from _create_embedding_list(graph, visited, neighbor_id)
 
@@ -80,8 +75,3 @@ def _neighbor_labels(graph, visited, node_id):
             edge_label = graph.edge[node_id][neighbor_id]['label']
             neighbor_label = graph.node[neighbor_id]['label']
             yield edge_label, neighbor_label, neighbor_id
-
-# def _closing_edge_labels(visited, node_id):
-#     for neighbor_id in graph.neighbors_iter(node_id):
-#         if (node_id, neighbor_id) in visited:
-#             yield graph.edge[node_id][neighbor_id]['label']

@@ -55,7 +55,7 @@ def read_line_graphs(file_path):
             elif line.startswith("#=>"):
                 embedding = characters[1]
                 graph_map[graph_id].graph['embeddings'].append(embedding)
-
+                
     return graph_map.values()
 
 def write_line_graphs(graphs, file_path):
