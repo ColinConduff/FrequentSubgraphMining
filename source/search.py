@@ -29,7 +29,6 @@ def find_frequent_subgraphs(initial_node_fragments, min_freq,
     queues = (deque(initial_node_fragments), deque(), deque(), deque())
 
     for level in levels:
-        print(level)
 
         if dont_generate_trees and level == Level.TREE or \
             dont_generate_cycles and level == Level.CYCLE:
