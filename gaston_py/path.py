@@ -1,6 +1,6 @@
 
-from source.fragment import Fragment
-from source.level import Level
+from gaston_py.fragment import Fragment
+from gaston_py.level import Level
 
 class Path(Fragment):
     """ A fragment containing a path subgraph. """

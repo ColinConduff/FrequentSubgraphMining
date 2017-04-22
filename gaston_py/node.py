@@ -1,7 +1,7 @@
 
-import source.graph as graph_module
-from source.fragment import Fragment
-from source.level import Level
+import gaston_py.graph as graph_module
+from gaston_py.fragment import Fragment
+from gaston_py.level import Level
 
 class Node(Fragment):
     """ A fragment containing a node subgraph. """

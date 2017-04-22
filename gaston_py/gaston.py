@@ -1,9 +1,9 @@
 
 from collections import Counter
 
-import source.graph as graph_module
-import source.factory as factory
-import source.search as search
+import gaston_py.graph as graph_module
+import gaston_py.factory as factory
+import gaston_py.search as search
 
 def gaston(min_support, input_file,
            dont_generate_cycles=False, dont_generate_trees=False,
@@ -60,67 +60,7 @@ def print_statistics(frequent_output):
     print("Paths: {}".format(graph_type_frequency['Path']))
     print("Trees: {}".format(graph_type_frequency['Tree']))
     print("Cycles: {}\n".format(graph_type_frequency['Cycle']))
-    
+
+    print("Frequent Subgraphs:")
     for embedding_list, (_, _, frequency) in frequent_output.items():
         print("embedding_list: {}, frequency: {}".format(''.join(embedding_list), frequency))
-
-# def find_paths(gaston_subgraph):
-#     for frontier_edge in gaston_subgraph.frontier_edges:
-#         # if is_valid_refinement():
-#         apply_refinement(gaston_subgraph, frontier_edge)
-
-#     for leg in legs:
-#         refined_subgraph = apply_refinement_to_path(l.refinement, path)
-#         joined_legs = set(join(leg, other_leg) for other_leg in legs if leg != other_leg)
-#         if l.refinement.is_cycle_refinement:
-#             # next_legs = next_legs??? + joined_legs
-#             find_cyclic_graphs(refined_subgraph, next_legs)
-#         else:
-#             next_legs = extend(leg) + joined_legs
-#             if refined_subgraph.graph_type = GraphType.PATH:
-#                 find_paths(refined_subgraph, next_legs)
-#             else:
-#                 find_trees(refined_subgraph, next_legs)
-
-# def find_trees(tree, legs):
-#     for leg in legs:
-#         refined_subgraph = apply_refinement_to_tree(l.refinement, tree)
-#         joined_legs = set(join(leg, other_leg) for other_leg in legs if leg != other_leg)
-#         if l.refinement.is_cycle_refinement:
-#             # next_legs = next_legs??? + joined_legs
-#             find_cyclic_graphs(refined_subgraph, next_legs)
-#         else:
-#             next_legs = restricted_extend(leg) + joined_legs
-#             find_trees(refined_subgraph, next_legs)
-
-# def find_cyclic_graphs(graph, legs):
-#     for leg in legs:
-#         refined_subgraph = apply_refinement_to_graph(l.refinement, graph)
-#         joined_legs = set(join(leg, other_leg) for other_leg in legs if other_leg > leg)
-#         # next_legs = next_legs??? + joined_legs
-#         find_cyclic_graphs(refined_subgraph, next_legs)
-
-# def join(leg1, leg2):
-#     new_leg.refinement = leg2.refinement
-#     new_leg.embedding_list = []
-#     for k, tk in enumerate(leg1.embedding_list):
-#         for tj in leg2.embedding_list:
-#             if tk.parent == tj.parent:
-#                 new_leg.embedding_list.append(k, tj.graph, tj.node)
-
-#     if new_leg is freqent:
-#         return new_leg
-#     else:
-#         return None
-
-# def extend(leg):
-#     candidate_legs = []
-#     for k, tk in enumerate(leg.embedding_list):
-#         for neighbor in tk.neighbors:
-#             if neighbor in tk.embedding_list:
-#                 # leg creates cycle
-#                 # candidate_leg.embedding_list.append(k, ???, ???)
-#             else:
-#                 # node refinement leg
-#                 candidate_leg.embedding_list.append(k, neighbor, t.graph)
-#     return [candidate for candidate in candidate_legs if candidate is frequent]

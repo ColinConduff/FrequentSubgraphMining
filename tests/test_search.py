@@ -1,8 +1,7 @@
 
 import unittest
 import networkx as nx
-import source.search as search
-import source.factory as factory
+from gaston_py import search, factory
 
 class SearchTestCase(unittest.TestCase):
 

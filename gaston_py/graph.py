@@ -2,11 +2,26 @@ import functools
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def draw_nx_graphs(graphs):
-    for graph in graphs:
-        nx.draw_networkx(graph)
-        # nx.draw_networkx_labels(graph)
-        plt.show()
+def draw_nx_graphs(output_file_path, frequent_output):
+    """ Save graphs with node and edge labels to output file path. """
+
+    for graph_id, (embedding, (graph, graph_type, frequency)) in enumerate(frequent_output.items()):
+
+        figure = plt.figure(graph_id)
+
+        node_labels = {id: data['label'] for (id, data) in graph.nodes_iter(data=True)}
+        edge_labels = {(u, v): data['label'] for (u, v, data) in graph.edges_iter(data=True)}
+
+        pos = nx.spring_layout(graph, k=0.8)
+        nx.draw_networkx(graph, pos, node_color='b', alpha=0.5, labels=node_labels)
+        nx.draw_networkx_edge_labels(graph, pos, edge_color='b', alpha=0.3, edge_labels=edge_labels)
+
+        plt.axis('off')
+        plt.title("{}\nGraph Type: {}, Frequency: {}".format(
+            ''.join(embedding), graph_type, frequency))
+        plt.savefig("{}graph{}.png".format(output_file_path, graph_id))
+
+        plt.close(figure)
 
 def create_nx_node_graph(source_node_id, node_label):
     current_graph = nx.Graph()

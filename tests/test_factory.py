@@ -1,11 +1,11 @@
 
 import unittest
 import networkx as nx
-import source.factory as factory
-from source.node import Node
-from source.path import Path
-from source.tree import Tree
-from source.cycle import Cycle
+import gaston_py.factory as factory
+from gaston_py.node import Node
+from gaston_py.path import Path
+from gaston_py.tree import Tree
+from gaston_py.cycle import Cycle
 
 class FactoryTestCase(unittest.TestCase):
 

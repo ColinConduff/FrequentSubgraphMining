@@ -1,8 +1,8 @@
 
 from collections import deque
 
-import source.factory as factory
-from source.level import Level
+import gaston_py.factory as factory
+from gaston_py.level import Level
 
 def find_frequent_subgraphs(initial_node_fragments, min_freq,
                             dont_generate_cycles=False, dont_generate_trees=False):

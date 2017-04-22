@@ -1,7 +1,7 @@
 
 import unittest
 import networkx as nx
-from source.gaston import gaston
+from gaston_py.gaston import gaston
 
 class GastonTestCase(unittest.TestCase):
 

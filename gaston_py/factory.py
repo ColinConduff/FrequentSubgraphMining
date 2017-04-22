@@ -1,10 +1,10 @@
 
-from source.node import Node
-from source.path import Path
-from source.tree import Tree
-from source.cycle import Cycle
-import source.graph as graph_module
-import source.embedding as embedding
+from gaston_py.node import Node
+from gaston_py.path import Path
+from gaston_py.tree import Tree
+from gaston_py.cycle import Cycle
+import gaston_py.graph as graph_module
+import gaston_py.embedding as embedding
 
 def initial_node_fragments(graphs):
     """ Creates initial node fragments from networkx graphs. """

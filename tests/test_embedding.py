@@ -1,7 +1,7 @@
 
 import unittest
 import networkx as nx
-import source.embedding as emb_module
+import gaston_py.embedding as emb_module
 
 class EmbeddingTestCase(unittest.TestCase):
 
