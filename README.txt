@@ -16,7 +16,7 @@ Software Requirements:
 
  Installation:
  `cd gaston_py`
- `pip install .`
+ `pip3 install .`
 
 Command Line Interface:
 For usage instructions, use the following command.
