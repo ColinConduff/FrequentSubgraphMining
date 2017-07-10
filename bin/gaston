@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+
+from gaston_py.command_line import main
+main()
