@@ -19,8 +19,8 @@ class Fragment(object):
         # Ensure correctness of gaston algorithm using unique hash values for each subgraph/fragment
         # Will be removed if correctness of faster methods are proven
         self.hash_value = hash(tuple(
-            sorted((u, data['label']) for u, data in self.current_graph.nodes_iter(data=True)) +
-            sorted(data['label'] for _, _, data in self.current_graph.edges_iter(data=True))
+            sorted((u, data['label']) for u, data in self.current_graph.nodes(data=True)) +
+            sorted(data['label'] for _, _, data in self.current_graph.edges(data=True))
             ))
 
     @property
@@ -30,9 +30,9 @@ class Fragment(object):
         Used to find possible refinements to fragments.
         """
         for node_id in self.current_graph:
-            edges = self.current_graph.edge[node_id]
+            edges = self.current_graph[node_id]
             if node_id in self.source_graph:
-                for neighbor_id in self.source_graph.neighbors_iter(node_id):
+                for neighbor_id in self.source_graph.neighbors(node_id):
                     if neighbor_id not in edges:
                         yield (node_id, neighbor_id)
 

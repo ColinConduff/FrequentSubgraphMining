@@ -3,16 +3,16 @@ def create_embedding_list(graph, source_id):
     """ Generalized, slow method for creating unique embedded lists for any type of graph. """
     embedding_labels = [graph.node[source_id]['label']]
     embed_iter = _create_embedding_list(graph, visited=set(), node_id=source_id)
-    
+
     for node_id, (edge_label, neighbor_label) in embed_iter:
         embedding_labels.append(edge_label)
         embedding_labels.append(neighbor_label)
-    
+
     return tuple(embedding_labels)
 
 def create_embedding_list_if_unique(graph, source_id, alt_source_id):
-    node_label = graph.node[source_id]['label']
-    alt_node_label = graph.node[alt_source_id]['label']
+    node_label = graph.nodes[source_id]['label']
+    alt_node_label = graph.nodes[alt_source_id]['label']
 
     if node_label > alt_node_label:
         return None
@@ -22,7 +22,7 @@ def create_embedding_list_if_unique(graph, source_id, alt_source_id):
         return create_embedding_list(graph, source_id)
     else:
         return _embedding_list_with_comparison(graph, source_id, alt_source_id, node_label, alt_node_label)
-    
+
 def _embedding_list_with_comparison(graph, source_id, alt_source_id, node_label, alt_node_label):
 
     embedding_list = [node_label]
@@ -57,7 +57,7 @@ def _embedding_list_with_comparison(graph, source_id, alt_source_id, node_label,
 
     if should_compare and source_node_ids > alt_node_ids:
         return None
-    
+
     return tuple(embedding_list)
 
 def _create_embedding_list(graph, visited, node_id):
@@ -70,8 +70,8 @@ def _create_embedding_list(graph, visited, node_id):
             yield from _create_embedding_list(graph, visited, neighbor_id)
 
 def _neighbor_labels(graph, visited, node_id):
-    for neighbor_id in graph.neighbors_iter(node_id):
+    for neighbor_id in graph.neighbors(node_id):
         if (node_id, neighbor_id) not in visited:
-            edge_label = graph.edge[node_id][neighbor_id]['label']
-            neighbor_label = graph.node[neighbor_id]['label']
+            edge_label = graph[node_id][neighbor_id]['label']
+            neighbor_label = graph.nodes[neighbor_id]['label']
             yield edge_label, neighbor_label, neighbor_id

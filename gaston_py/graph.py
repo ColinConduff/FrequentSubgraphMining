@@ -9,8 +9,8 @@ def draw_nx_graphs(output_file_path, frequent_output):
 
         figure = plt.figure(graph_id)
 
-        node_labels = {id: data['label'] for (id, data) in graph.nodes_iter(data=True)}
-        edge_labels = {(u, v): data['label'] for (u, v, data) in graph.edges_iter(data=True)}
+        node_labels = {id: data['label'] for (id, data) in graph.nodes}
+        edge_labels = {(u, v): data['label'] for (u, v, data) in graph.edges}
 
         pos = nx.spring_layout(graph, k=0.8)
         nx.draw_networkx(graph, pos, node_color='b', alpha=0.5, labels=node_labels)
@@ -70,7 +70,7 @@ def read_line_graphs(file_path):
             elif line.startswith("#=>"):
                 embedding = characters[1]
                 graph_map[graph_id].graph['embeddings'].append(embedding)
-                
+
     return graph_map.values()
 
 def write_line_graphs(graphs, file_path):
@@ -84,12 +84,12 @@ def write_line_graphs(graphs, file_path):
 
             node_dict = {}
 
-            for index, (node_id, data) in enumerate(graph.nodes_iter(data=True)):
+            for index, (node_id, data) in enumerate(graph.nodes):
                 node_dict[node_id] = index
                 node_label = data['label']
                 f.write("v {} {}\n".format(index, node_label))
 
-            for source, target, data in graph.edges_iter(data=True):
+            for source, target, data in graph.edges:
                 f.write("e {} {} {}\n".format(node_dict[source], node_dict[target], data['label']))
 
 def count_total_nodes(graphs):
@@ -99,7 +99,7 @@ def count_total_edges(graphs):
     return functools.reduce(lambda total, graph: total + graph.number_of_edges(), graphs, 0)
 
 def count_unique_nodes(graphs):
-    return len(set(data['label'] for graph in graphs for _, data in graph.nodes_iter(data=True)))
+    return len(set(data['label'] for graph in graphs for _, data in graph.nodes))
 
 def count_unique_edges(graphs):
-    return len(set(edge['label'] for graph in graphs for _, _, edge in graph.edges_iter(data=True)))
+    return len(set(edge['label'] for graph in graphs for _, _, edge in graph.edges))
