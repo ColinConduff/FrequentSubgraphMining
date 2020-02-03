@@ -52,9 +52,9 @@ def apply_refinement(prev_fragment, edge, dont_generate_cycles, dont_generate_tr
 def _create_path_from_node(node_fragment, appending_node_id):
     source_node_id, source_graph = node_fragment.source_node_id, node_fragment.source_graph
 
-    start_node_label = source_graph.node[source_node_id]['label']
-    appending_node_label = source_graph.node[appending_node_id]['label']
-    edge_label = source_graph.edge[source_node_id][appending_node_id]['label']
+    start_node_label = source_graph.nodes[source_node_id]['label']
+    appending_node_label = source_graph.nodes[appending_node_id]['label']
+    edge_label = source_graph[source_node_id][appending_node_id]['label']
 
     # Check if refinement is allowed
     if appending_node_label < start_node_label:
@@ -82,8 +82,8 @@ def _create_path_from_node(node_fragment, appending_node_id):
 
 def _append_to_path(prev_path, new_back_id):
 
-    target_node_label = prev_path.source_graph.node[new_back_id]['label']
-    target_edge_label = prev_path.source_graph.edge[prev_path.back_node_id][new_back_id]['label']
+    target_node_label = prev_path.source_graph.nodes[new_back_id]['label']
+    target_edge_label = prev_path.source_graph[prev_path.back_node_id][new_back_id]['label']
 
     # edge1 = tuple(prev_path.embedding_list[:2]) # (l(v1), l(e1))
     # new_edge = (target_node_label, target_edge_label)
@@ -121,7 +121,7 @@ def _append_to_path(prev_path, new_back_id):
 def _prepend_node_to_path(prev_path, new_node_id):
 
     new_node_label = prev_path.source_graph.node[new_node_id]['label']
-    new_edge_label = prev_path.source_graph.edge[new_node_id][prev_path.source_node_id]['label']
+    new_edge_label = prev_path.source_graph[new_node_id][prev_path.source_node_id]['label']
 
     # edge1 = tuple(prev_path.embedding_list[:2]) # (l(v1), l(e1))
     # new_edge = (new_node_label, new_edge_label)
@@ -160,8 +160,8 @@ def _create_tree(prev_fragment, origin_id, target_id):
 
     source_graph = prev_fragment.source_graph
 
-    new_node_label = source_graph.node[target_id]['label']
-    new_edge_label = source_graph.edge[origin_id][target_id]['label']
+    new_node_label = source_graph.nodes[target_id]['label']
+    new_edge_label = source_graph[origin_id][target_id]['label']
 
     current_graph = graph_module.extend_nx_graph(prev_fragment.current_graph, origin_id, target_id,
                                                  new_node_label, new_edge_label)
@@ -181,8 +181,8 @@ def _create_cycle(prev_fragment, origin_id, target_id):
     source_graph = prev_fragment.source_graph
     prev_graph = prev_fragment.current_graph
 
-    new_node_label = source_graph.node[target_id]['label']
-    new_edge_label = source_graph.edge[origin_id][target_id]['label']
+    new_node_label = source_graph.nodes[target_id]['label']
+    new_edge_label = source_graph[origin_id][target_id]['label']
 
     current_graph = graph_module.extend_nx_graph(prev_graph, origin_id, target_id,
                                                  new_node_label, new_edge_label)

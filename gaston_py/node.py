@@ -8,7 +8,7 @@ class Node(Fragment):
 
     def __init__(self, source_node_id, source_graph):
 
-        node_label = source_graph.node[source_node_id]['label']
+        node_label = source_graph.nodes[source_node_id]['label']
         current_graph = graph_module.create_nx_node_graph(source_node_id, node_label)
 
         embedding_list = tuple([node_label])
@@ -22,4 +22,4 @@ class Node(Fragment):
     def queue_level(self):
         """ A property to specify the search queue containing node fragments. """
         return Level.NODE
-    
+
